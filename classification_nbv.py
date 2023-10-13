@@ -12,9 +12,9 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 
 def showGrid(grid, nbv = None, predicted_nbv = None):
     # receives a plain grid and plots the 3d voxel map
-    #grid3d = np.reshape(grid, (32,32,32))
+    #grid3d = np.reshape(grid, (31,31,31))
     grid3d = grid
-    unknown = np.logical_and((grid3d > 0.4),(grid3d <= 0.7))
+    unknown = (grid3d == 0.5)#np.logical_and((grid3d > 0.4),(grid3d <= 0.7))
     occupied = (grid3d > 0.5)
 
     # combine the objects into a single boolean array
