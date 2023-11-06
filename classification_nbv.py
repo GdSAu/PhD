@@ -1,6 +1,7 @@
 # Juan Irving Vasquez-Gomez
 # jivg.org
 
+from typing import Any
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
@@ -10,16 +11,15 @@ import os
 # This import registers the 3D projection, but is otherwise unused.
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 
-def showGrid(grid, nbv = None, predicted_nbv = None):
+def showGrid(grid, direction, nbv = None, predicted_nbv = None):
     # receives a plain grid and plots the 3d voxel map
-    #grid3d = np.reshape(grid, (31,31,31))
-    grid3d = grid
-    unknown = (grid3d == 0.5)#np.logical_and((grid3d > 0.4),(grid3d <= 0.7))
+    grid3d = np.reshape(grid, (31,31,31))
+    #grid3d = grid
+    unknown = grid3d== 0.5 #np.logical_and((grid3d > 0.4),(grid3d <= 0.6))
     occupied = (grid3d > 0.5)
 
     # combine the objects into a single boolean array
     voxels = unknown | occupied
-
     # set the colors of each object
     colors = np.empty(voxels.shape, dtype=object)
     colors[unknown] = 'yellow'
@@ -49,7 +49,17 @@ def showGrid(grid, nbv = None, predicted_nbv = None):
         direction = center - position
         #print(position)
         ax.quiver(position[0], position[1], position[2], direction[0], direction[1], direction[2], length=5.0, normalize=True, color = 'r')
-    
+    ###QUITAR (comentar/descomentar) solo si necesitas quitar el grid
+    # Hide grid lines
+    #ax.grid(visible=None)
+
+    # Hide axes ticks
+    #ax.set_xticks([])
+    #ax.set_yticks([])
+    #ax.set_zticks([])
+    #plt.axis('off')
+    ###
+    plt.savefig(direction, bbox_inches = 'tight')
     plt.pause(0.001)  # pause a bit so that plots are updated
     #plt.show()
     
@@ -161,10 +171,27 @@ class To3DGrid(object):
         # swap color axis because
         # numpy image: H i x W j x C k
         # torch image: C k X H i X W j
-        grid = np.reshape(grid, (32,32,32))
+        grid = np.reshape(grid, (31,31,31))
         return {'grid': grid,
                 'nbv_class': nbv_class}
-    
+
+class ToSO3(object):
+    """Convert angles to SO3 matrix
+        Its organized as x,y,z,r11,...,r33"""
+    def __call__(self, sample):
+
+        grid, nbv_class = sample['grid'], sample['nbv_class']
+        x = nbv_class[0]
+        y = nbv_class[1]
+        z = nbv_class[2]
+        a = nbv_class[3]
+        b = nbv_class[4]
+        g = nbv_class[5]
+        nbv_class = np.asarray([x,y,z,np.cos(a)*np.cos(b)-np.sin(a)*np.sin(b)*np.cos(g), -np.cos(a)*np.sin(b)-np.sin(a)*np.cos(b)*np.cos(g), np.sin(a)*np.sin(g),
+           np.sin(a)*np.cos(b)-np.cos(a)*np.sin(b)*np.cos(g) , np.sin(a)*np.sin(b)*np.sin(g)+np.cos(a)*np.cos(g), -np.cos(a)*np.sin(g),
+           -np.sin(b)*np.cos(g), np.cos(b)*np.sin(g), np.cos(g)], dtype='float64')
+        return {'grid': grid,
+                'nbv_class': nbv_class}
 
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
@@ -177,4 +204,5 @@ class ToTensor(object):
         # torch image: C k X H i X W j
         #grid = grid.transpose((2, 0, 1))
         return {'grid': torch.from_numpy(np.array([grid])),
-                'nbv_class': torch.tensor(nbv_class[0], dtype=torch.int64)}
+                'nbv_class': torch.from_numpy(np.array([nbv_class]))}
+                #'nbv_class': torch.tensor(nbv_class[0], dtype=torch.int64)}
