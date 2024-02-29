@@ -1,6 +1,7 @@
 import torch
 import torch.nn.init as init
 from torch.autograd import Variable
+from voxnet_coder_decoder import VoxNetAutoencoder as voxnet
 
 
 # Entrenamiento
@@ -107,7 +108,7 @@ def net_sample_output(model, train_loader, device):
             grids = sample['grid']
             nbvs = sample['nbv_class']
 
-                # convert images to FloatTensors
+            # convert images to FloatTensors
             grids = grids.type(torch.FloatTensor)
 
                 # wrap them in a torch Variable
@@ -118,11 +119,107 @@ def net_sample_output(model, train_loader, device):
             output = model(grids)
             grids = grids.cpu()
             output = output.cpu()
-
-                # get the predicted class from the maximum value in the output-list of class scores
-            _, predicted = torch.max(output.data, 1)
-
                 # break after first image is tested
             
             return grids, output, nbvs
-               
+
+
+## IMPORTANTE: hay que probarlo
+def get_latent_space(grids, device):
+    path = 'stuff/experimento_2/weights_nmodelo_vox_16_4.pth'
+    model= voxnet(latent_space = 16).cuda()
+    model.load_state_dict(torch.load(path))
+    
+    #grids = grids.type(torch.FloatTensor)
+        # wrap them in a torch Variable
+    grids = Variable(grids)    
+    grids = grids.to(device)
+        # forward pass to get net coder output
+    output = model.codificador(grids)
+    grids = grids.cpu()
+    output = output[0].cpu()
+    del model
+    del grids
+    return output
+
+
+
+def entrena_nbv(dataloader, model, loss_fn, optimizer, device):
+    for i, sample in enumerate(dataloader):
+        
+        nbv = sample['nbv_class']
+        grid = sample ['grid']
+        grid = grid.type(torch.FloatTensor)# no pude transformar en get_l
+        grid = get_latent_space(grid, device)
+        # convert images to FloatTensors
+        nbv = nbv.type(torch.FloatTensor)
+        
+        # wrap them in a torch Variable
+        nbv = Variable(nbv)   
+        grid = Variable(grid)  
+        
+        nbv = nbv.to(device)
+        grid = grid.to(device)
+        #=============forward==================
+        output = model(grid)
+        loss = loss_fn(output, nbv)
+
+        #=============backward=================
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+    return loss
+
+def valida_nbv(dataloader, model, loss_fn, device):
+    test_loss = 0
+
+    for sample in dataloader:
+        
+        # get sample data: images and ground truth keypoints
+        nbv = sample['nbv_class']
+        grid = sample ['grid']
+        grid = grid.type(torch.FloatTensor)
+        grid = get_latent_space(grid, device)
+        
+        # convert images to FloatTensors
+        nbv = nbv.type(torch.FloatTensor)
+        
+        # wrap them in a torch Variable
+        nbv = Variable(nbv)  
+        grid = Variable(grid) 
+
+        nbv = nbv.to(device)
+        grid = grid.to(device)
+        
+        output = model.forward(grid)
+        test_loss += loss_fn(output, nbv).item()
+
+    return test_loss
+
+def net_sample_output_nbv(model, train_loader, device):
+    model.eval()
+    
+    # iterate through the test dataset
+    for i, sample in enumerate(train_loader):
+        
+        if i == 0:
+            # get sample data: images and ground truth keypoints
+            grid = sample['grid']
+            nbv = sample['nbv_class']
+
+            grid = grid.type(torch.FloatTensor)# no pude transformar en get_l
+            l_s = get_latent_space(grid, device)
+            # convert images to FloatTensors
+            nbv = nbv.type(torch.FloatTensor)
+            # wrap them in a torch Variable
+            l_s = Variable(l_s)  
+            l_s = l_s.to(device)
+
+            # forward pass to get net output
+            output = model(l_s)
+            output = output.cpu()
+            nbv = nbv.cpu()
+                # break after first image is tested
+            
+            return output, nbv
