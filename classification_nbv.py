@@ -67,7 +67,7 @@ def showGrid(grid, direction, nbv = None, predicted_nbv = None):
     
 def showGrid4(grid, nbv = None, predicted_nbv = None):
      # receives a plain grid and plots the 3d voxel map
-    grid3d = np.reshape(grid, (32,32,32))
+    grid3d = np.reshape(grid, (31,31,31))
 
     unknown = (grid3d == 0.5)
     occupied = (grid3d > 0.5)

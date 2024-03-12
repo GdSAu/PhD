@@ -10,6 +10,6 @@ def symbolic(direcciones):
 
 def symbolic_dir(direccion):
     d = direccion
-    file_src =  d + '/materials/textures/texture.png' #source file
-    file_dst =  d + '/meshes/texture.png' #destiny file
+    file_src = d + '/materials/textures/texture.png' #source file
+    file_dst = d + '/meshes/texture.png' #destiny file
     os.symlink(file_src,file_dst) #create link
