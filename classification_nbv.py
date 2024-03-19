@@ -67,7 +67,7 @@ def showGrid(grid, direction, nbv = None, predicted_nbv = None):
     
 def showGrid4(grid, nbv = None, predicted_nbv = None):
      # receives a plain grid and plots the 3d voxel map
-    grid3d = np.reshape(grid, (32,32,32))
+    grid3d = np.reshape(grid, (31,31,31))
 
     unknown = (grid3d == 0.5)
     occupied = (grid3d > 0.5)
@@ -172,6 +172,7 @@ class To3DGrid(object):
         # numpy image: H i x W j x C k
         # torch image: C k X H i X W j
         grid = np.reshape(grid, (31,31,31))
+        
         return {'grid': grid,
                 'nbv_class': nbv_class}
 
@@ -184,12 +185,8 @@ class ToSO3(object):
         x = nbv_class[0]
         y = nbv_class[1]
         z = nbv_class[2]
-        a = nbv_class[3]
-        b = nbv_class[4]
-        g = nbv_class[5]
-        nbv_class = np.asarray([x,y,z,np.cos(a)*np.cos(b)-np.sin(a)*np.sin(b)*np.cos(g), -np.cos(a)*np.sin(b)-np.sin(a)*np.cos(b)*np.cos(g), np.sin(a)*np.sin(g),
-           np.sin(a)*np.cos(b)-np.cos(a)*np.sin(b)*np.cos(g) , np.sin(a)*np.sin(b)*np.sin(g)+np.cos(a)*np.cos(g), -np.cos(a)*np.sin(g),
-           -np.sin(b)*np.cos(g), np.cos(b)*np.sin(g), np.cos(g)], dtype='float64')
+
+        nbv_class = np.asarray([x,y,z], dtype='float64')
         return {'grid': grid,
                 'nbv_class': nbv_class}
 
@@ -204,5 +201,5 @@ class ToTensor(object):
         # torch image: C k X H i X W j
         #grid = grid.transpose((2, 0, 1))
         return {'grid': torch.from_numpy(np.array([grid])),
-                'nbv_class': torch.from_numpy(np.array([nbv_class]))}
+                'nbv_class': torch.from_numpy(np.array(nbv_class))}
                 #'nbv_class': torch.tensor(nbv_class[0], dtype=torch.int64)}
