@@ -21,6 +21,12 @@ def Get_RGBD(render, fov, center, eye, up, direccion, i):
    o3d.io.write_image(direccion +"/RGB/RGB_{}.png".format(i), img, 9)
    cv2.imwrite(direccion + "/Depth/D_{}.tiff".format(i), np.asarray(depth))
 
+def Get_PointcloudGT (direccion, mesh):
+  #Creamos nube de puntos GT
+  size = np.asarray(mesh.vertices).shape[0]
+  mesh.compute_vertex_normals()
+  p_gt = mesh.sample_points_uniformly(number_of_points=size*10)
+  o3d.io.write_point_cloud(direccion + "/Point_cloud/cloud_gt.pcd", p_gt, write_ascii=True)# GT cloud 
 
 def Get_Pointcloud(scene, fov, center, eye, up, width, height, direccion, i):
   '''scene: scene object which contains the mesh
@@ -53,10 +59,11 @@ def Get_Pointcloud(scene, fov, center, eye, up, width, height, direccion, i):
   if i == 0:
     p_c = pcd
   else:
-    p_c = o3d.t.io.read_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i-1))
+    p_c = o3d.t.io.read_point_cloud(direccion + "/Point_cloud/cloud_acc.pcd")
     p_c.point["positions"] = o3d.core.concatenate((p_c.point["positions"], pcd.point["positions"]), 0)
 
-  o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i), p_c, write_ascii=True) 
+  o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i), pcd, write_ascii=True)# cloud in t-time
+  o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_acc.pcd", p_c, write_ascii=True)# accumulated cloud 
 
 def Get_octree(octree, direccion, i, origin, resolution= 0.01):
   '''octree -> occupation prob [n,]
