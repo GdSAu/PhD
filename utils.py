@@ -127,18 +127,18 @@ def net_sample_output(model, train_loader, device):
 ## IMPORTANTE: hay que probarlo
 def get_latent_space(grids, device):
     path = 'stuff/experimento_2/weights_nmodelo_vox_16_4.pth'
-    model= voxnet(latent_space = 16).cuda()
-    model.load_state_dict(torch.load(path))
+    model1= voxnet(latent_space = 16).cuda()
+    model1.load_state_dict(torch.load(path))
     
     #grids = grids.type(torch.FloatTensor)
         # wrap them in a torch Variable
     grids = Variable(grids)    
     grids = grids.to(device)
         # forward pass to get net coder output
-    output = model.codificador(grids)
+    output = model1.codificador(grids)
     grids = grids.cpu()
     output = output[0].cpu()
-    del model
+    del model1
     del grids
     return output
 
@@ -223,3 +223,15 @@ def net_sample_output_nbv(model, train_loader, device):
                 # break after first image is tested
             
             return output, nbv
+
+def net_position_nbv(model, grid, device):
+    
+    with torch.no_grad():
+        grid = grid.type(torch.FloatTensor)# no pude transformar en get_l
+        l_s = get_latent_space(grid, device)
+        l_s = Variable(l_s)  
+        l_s = l_s.to(device)
+        # forward pass to get net output
+        output = model(l_s)
+        output = output.cpu()
+    return output

@@ -11,7 +11,11 @@ def extract_zip(folder, model_name):
     os.remove(file_name) # del file
 
 
-def download_collection(owner_name, collection_name, folder): 
+def download_collection(owner_name, collection_name, folder, pages): 
+    #the max num of objects is 1033
+    max_obj = 1033
+    if pages > max_obj:
+        pages = max_obj
 
     if os.path.lexists(folder) == True:
         print("Folder already exist, verify if dataset is downloaded")
@@ -46,9 +50,9 @@ def download_collection(owner_name, collection_name, folder):
 
     # Path to download a single model in the collection
     download_url = base_url + fuel_version + '/{}/models/'.format(owner_name)
-
+    f = True
     # Iterate over the pages
-    while True:
+    while f == True:
         url = base_url + fuel_version + next_url
 
         # Get the contents of the current page.
@@ -63,10 +67,12 @@ def download_collection(owner_name, collection_name, folder):
         # Compute the next page's URL
         page = page + 1
         next_url = '/models?page={}&per_page=100&q=collections:{}'.format(page,collection_name)
-    
         # Download each model 
         for model in models:
             count+=1
+            if count >= pages+1:
+                f = False
+                break
             model_name = model['name']
             print ('Downloading (%d) %s' % (count, model_name))
             download = requests.get(download_url+model_name+'.zip', stream=True)
