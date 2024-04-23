@@ -60,6 +60,7 @@ def showGrid(grid, direction, nbv = None, predicted_nbv = None):
     #plt.axis('off')
     ###
     plt.savefig(direction, bbox_inches = 'tight')
+    plt.close()
     plt.pause(0.001)  # pause a bit so that plots are updated
     #plt.show()
     

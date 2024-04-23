@@ -25,18 +25,19 @@ def chamfer_distance(dir_carpeta):
     return (distance_1_to_2 + distance_2_to_1) / (len(points1) + len(points2))
 
 
-def Get_cloud_distance(direccion,i,umbral=0.001, gainfilter = 4.0): # 0.0037 #P_t - P_t-1 < umbral
-    if i > 0:
-        pt = o3d.io.read_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i), remove_nan_points=True, remove_infinite_points = True)
-        pt_1 = o3d.io.read_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i-1), remove_nan_points=True, remove_infinite_points = True)
-        dist = np.asarray(pt.compute_point_cloud_distance(pt_1))
-        ind = np.where(dist < umbral)[0]
-        pcd_wo = pt.select_by_index(ind)
-        size = (100*np.asarray(pcd_wo.points).shape[0])/np.asarray(pt_1.points).shape[0]
-        if size <= gainfilter:
-            return True, size
-        else:
-            return False, size
+def  Get_surface_coverage(direccion,i,umbral=0.001): # 0.0037 #P_t - P_t-1 < umbral
+    
+    pt = o3d.io.read_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i), remove_nan_points=True, remove_infinite_points = True)
+    pt_1 = o3d.io.read_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i-1), remove_nan_points=True, remove_infinite_points = True)
+    dist = np.asarray(pt.compute_point_cloud_distance(pt_1))
+    ind = np.where(dist < umbral)[0]
+    return ind, dist
+
+def stop_condition(direccion,ind,i,umbral= 0.9):
+    pt = o3d.io.read_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i), remove_nan_points=True, remove_infinite_points = True)
+    size = len(ind)/np.asarray(pt.points).shape[0]
+    if size < umbral:
+        condicion = False
     else:
-        size=100.0
-        return False, size
+        condicion = True
+    return condicion, size

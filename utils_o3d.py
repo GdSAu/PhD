@@ -5,6 +5,15 @@ import trimesh
 import matplotlib.pyplot as plt
 import cv2
 
+def scale_and_translate(mesh, scale_factor=0.4):
+  max = mesh.get_max_bound()
+  scale = scale_factor/np.max(max)
+  mesh.scale(scale, center= mesh.get_center())#Scale mesh
+  traslacion = - np.asarray(mesh.get_min_bound())[2]
+  traslacion =  [0,0,traslacion]
+  mesh.translate(traslacion) #translate mesh
+  return mesh
+
 def Get_RGBD(render, fov, center, eye, up, direccion, i):
    ''' (render,fov,center,eye,up) -> RGB-D
       render : es el objeto de escena que contiene el objeto
@@ -65,7 +74,7 @@ def Get_Pointcloud(scene, fov, center, eye, up, width, height, direccion, i):
   o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i), pcd, write_ascii=True)# cloud in t-time
   o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_acc.pcd", p_c, write_ascii=True)# accumulated cloud 
 
-def Get_octree(octree, direccion, i, origin, resolution= 0.01):
+def Get_octree(octree, direccion, i, origin, puntos,resolution= 0.01):
   '''octree -> occupation prob [n,]
     octree: octree object
     direccion: root folder direction
@@ -77,25 +86,8 @@ def Get_octree(octree, direccion, i, origin, resolution= 0.01):
       pointcloud= np.asarray(p_c.points), 
       origin= np.asarray(origin), #Measurement origin
       maxrange=-1, # maximum range for how long individual beams are inserted
-      ) 
-  
-  #BBOX min & max
-  aabb_min = octree.getMetricMin() 
-  aabb_max = octree.getMetricMax()
-  center = (aabb_min + aabb_max) / 2
-  dimension = np.array([31, 31, 31]) # Voxelization dimensions
-  origin = center - dimension / 2 * resolution
-
-  #New BBox given the new resolution
-  aabb_min = origin - resolution / 2
-  aabb_max = origin + dimension * resolution + resolution / 2
-  grid = np.full(dimension, -1, np.int32)
-  transform = trimesh.transformations.scale_and_translate(
-      scale=resolution, translate=origin
-  )
-  # Voxelgrid encoding (create grid) and probability allocation
-  points = trimesh.voxel.VoxelGrid(encoding=grid, transform=transform).points # Voxel grid con los puntos de la nube
-  puntos = np.asarray(points)
+      )  
+  #arreglo = np.ndarray([29791])
   arreglo = np.full((29791), 0.5)
   j = 0 
   for i in puntos:
@@ -110,3 +102,20 @@ def Get_octree(octree, direccion, i, origin, resolution= 0.01):
               pass
       j += 1 
   return arreglo
+
+def Get_voxpoints(resolution=0.0129,max_dim=.4, dim = 31):
+  #BBOX min & max
+  aabb_min = np.asarray([-(max_dim/2),-(max_dim/2),0.0])
+  aabb_max = np.asarray([(max_dim/2),(max_dim/2),max_dim])
+  center = (aabb_min + aabb_max) / 2
+  dimension = np.array([dim, dim, dim]) # Voxelization dimensions
+  origin = center - dimension/2  * resolution
+  #New BBox given the new resolution
+  grid = np.full(dimension, -1, np.int32)
+  transform = trimesh.transformations.scale_and_translate(
+      scale=resolution, translate=origin
+  )
+  # Voxelgrid encoding (create grid)
+  points = trimesh.voxel.VoxelGrid(encoding=grid, transform=transform).points # Voxel grid con los puntos de la nube
+  puntos = np.asarray(points)
+  return puntos
