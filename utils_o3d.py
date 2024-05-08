@@ -74,7 +74,7 @@ def Get_Pointcloud(scene, fov, center, eye, up, width, height, direccion, i):
   o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i), pcd, write_ascii=True)# cloud in t-time
   o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_acc.pcd", p_c, write_ascii=True)# accumulated cloud 
 
-def Get_octree(octree, direccion, i, origin, puntos,resolution= 0.01):
+def Get_octree(octree, direccion, i, origin, puntos): #,arreglo):
   '''octree -> occupation prob [n,]
     octree: octree object
     direccion: root folder direction
@@ -87,8 +87,8 @@ def Get_octree(octree, direccion, i, origin, puntos,resolution= 0.01):
       origin= np.asarray(origin), #Measurement origin
       maxrange=-1, # maximum range for how long individual beams are inserted
       )  
-  #arreglo = np.ndarray([29791])
-  arreglo = np.full((29791), 0.5)
+  #arreglo = np.ndarray([29791], dtype=float)
+  arreglo = np.full((29791), 0.0)
   j = 0 
   for i in puntos:
       #Get occupancy probability given a position (x,y,z)
@@ -100,11 +100,13 @@ def Get_octree(octree, direccion, i, origin, puntos,resolution= 0.01):
               arreglo[j] = probability 
           except:
               pass
+              #arreglo[j] = 0.5
       j += 1 
   return arreglo
 
-def Get_voxpoints(resolution=0.0129,max_dim=.4, dim = 31):
+def Get_voxpoints(max_dim=.4, dim = 31):
   #BBOX min & max
+  resolution = max_dim/dim
   aabb_min = np.asarray([-(max_dim/2),-(max_dim/2),0.0])
   aabb_max = np.asarray([(max_dim/2),(max_dim/2),max_dim])
   center = (aabb_min + aabb_max) / 2

@@ -17,3 +17,6 @@ objetos/
 obj/
 position/
 metricas.npz
+duck/
+metricas_duck.npz
+trayectoria_camara_prueba.json
