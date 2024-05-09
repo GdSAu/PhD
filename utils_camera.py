@@ -1,3 +1,6 @@
+import open3d as o3d
+import numpy as np
+
 class camara: 
 
   def calcular_matriz_extrinsecas(eye, center, up, fov, width, height):
@@ -7,10 +10,10 @@ class camara:
       I = np.eye(4)
       view_matrix = np.stack([I] * len(eye))
       z_axis = (center - eye) / np.linalg.norm(center - eye)
-      x_axis = np.cross(up, z_axis) / np.linalg.norm(np.cross(up, z_axis))
-      y_axis = np.cross(z_axis, x_axis)
+      x_axis = np.cross(z_axis, up) / np.linalg.norm(np.cross(z_axis, up))
+      y_axis = np.cross(x_axis, z_axis)
       view_matrix[:,:3,:3] = np.stack((x_axis, y_axis, -z_axis), axis=-1)
-      view_matrix_t[:,:3,3:]= np.stack(np.reshape(eye, (len(view_matrix),3,1)), axis=0)
+      view_matrix[:,:3,3:]= np.stack(np.reshape(eye, (len(view_matrix),3,1)), axis=0)
 
       return view_matrix
 
