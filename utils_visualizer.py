@@ -82,6 +82,7 @@ def draw_camera(I,E,w,h,scale=1.0,color=[0.8,0.2,0.8]):
   height_w = abs(points[1][1]) + abs(points[3][1])
   plane = o3d.geometry.TriangleMesh.create_box(width_w, height_w, depth = 1e-6)
   plane.paint_uniform_color(color)
+  plane.translate([points[1][0], points[1][1], -scale])
   plane.transform(E)
 
   # view pyramid
