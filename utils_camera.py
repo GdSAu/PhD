@@ -13,7 +13,7 @@ class camara:
       x_axis = np.cross(z_axis, up) / np.linalg.norm(np.cross(z_axis, up))
       y_axis = np.cross(x_axis, z_axis)
       view_matrix[:,:3,:3] = np.stack((x_axis, y_axis, -z_axis), axis=-1)
-      view_matrix[:,:3,3:]= np.stack(np.reshape(eye, (len(view_matrix),3,1)), axis=0)
+      view_matrix[:,:3,3:]= np.stack(np.reshape(eye, (len(view_matrix),3,1)), axis=0)#Traslation
 
       return view_matrix
 

@@ -34,7 +34,7 @@ class Visualizar():
             width = param.parameters[i].intrinsic.width
             height = param.parameters[i].intrinsic.height
             camera_model = draw_camera(intrinsic, extrinsic, width, height)
-            frames.extend(camera_model)
+            frames.append(camera_model)
         for i in frames:
             self.__vis.add_geometry(i)
     
@@ -78,15 +78,16 @@ def draw_camera(I,E,w,h,scale=1.0,color=[0.8,0.2,0.8]):
   points = [C_inv @ p for p in pix_points]
 
   #image plane 
-  width_w = abs(points[1][0]) + abs(points[3][0])
+  width_w = abs(points[1][0]) + abs(points[2][0])
   height_w = abs(points[1][1]) + abs(points[3][1])
   plane = o3d.geometry.TriangleMesh.create_box(width_w, height_w, depth = 1e-6)
   plane.paint_uniform_color(color)
-  plane.translate([points[1][0], points[1][1], -scale])
   plane.transform(E)
+  plane.translate(axis.get_center(), relative=False)
 
   # view pyramid
-  points_w = np.asarray([(E[:3,:3] @ p + E[:3,3:]) for p in points]).reshape(15,3)
+  ### TODO: verificar la transformación de puntos al mundo
+  #points_w = np.asarray([(E[:3,:3] @ p + E[:3,3:]) for p in points]).reshape(15,3)
   lines = [[0, 1],
   [0, 2],
   [0, 3],
@@ -94,9 +95,22 @@ def draw_camera(I,E,w,h,scale=1.0,color=[0.8,0.2,0.8]):
   ]
   colors = [color for i in range(len(lines))]
   line_set = o3d.geometry.LineSet(
-    points = o3d.utility.Vector3dVector(points_w),
-    lines = o3d.utility.Vector2iVector(lines)
-  )
+    points = o3d.utility.Vector3dVector(points),
+    lines = o3d.utility.Vector2iVector(lines) 
+    )
   line_set.colors = o3d.utility.Vector3dVector(colors)
-
+  
+  # Rotation in X
+  R_x_180 = np.array([
+    [1, 0, 0],
+    [0, -1, 0],
+    [0, 0, -1]
+     ])
+  line_set.rotate(R_x_180)
+  line_set.transform(E)
+  #plane.rotate(R_x_180)
+  line_set.translate(axis.get_center(), relative=False)
+  #axis.translate(points_w[0], relative=False)
+  
+  
   return [axis, plane, line_set]
