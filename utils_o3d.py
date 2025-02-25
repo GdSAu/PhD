@@ -37,7 +37,7 @@ def Get_PointcloudGT (direccion, mesh):
   p_gt = mesh.sample_points_uniformly(number_of_points=size*10)
   o3d.io.write_point_cloud(direccion + "/Point_cloud/cloud_gt.pcd", p_gt, write_ascii=True)# GT cloud 
 
-def Get_Pointcloud(scene, fov, center, eye, up, width, height, direccion, i):
+def Get_Pointcloud(scene, fov, center, eye, up, width, height, direccion, i,save_acc = False):
   '''scene: scene object which contains the mesh
     fov: vertical field of view
     center: camera center (orientation, where the camera see)
@@ -46,6 +46,7 @@ def Get_Pointcloud(scene, fov, center, eye, up, width, height, direccion, i):
     width, height : width and height of the image 
     direccion: root folder direction
     i = index in loop
+    save_acc = (boolean value) to save accumulated pointcloud
   '''
 
   # (scene, fov, center, eye, up, width, height) -> point cloud
@@ -64,15 +65,16 @@ def Get_Pointcloud(scene, fov, center, eye, up, width, height, direccion, i):
   pcd = o3d.t.geometry.PointCloud()
   pcd.point["positions"] = o3d.core.Tensor(points.numpy())
   
-  # if the poincloud is new it begins the cloud, else the new perception is added to the accumulated cloud
-  if i == 0:
-    p_c = pcd
-  else:
-    p_c = o3d.t.io.read_point_cloud(direccion + "/Point_cloud/cloud_acc.pcd")
-    p_c.point["positions"] = o3d.core.concatenate((p_c.point["positions"], pcd.point["positions"]), 0)
-
   o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_{}.pcd".format(i), pcd, write_ascii=True)# cloud in t-time
-  o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_acc.pcd", p_c, write_ascii=True)# accumulated cloud 
+
+  if save_acc == True:
+    # if the poincloud is new it begins the cloud, else the new perception is added to the accumulated cloud
+    if i == 0:
+      p_c = pcd
+    else:
+      p_c = o3d.t.io.read_point_cloud(direccion + "/Point_cloud/cloud_acc.pcd")
+      p_c.point["positions"] = o3d.core.concatenate((p_c.point["positions"], pcd.point["positions"]), 0)
+    o3d.t.io.write_point_cloud(direccion + "/Point_cloud/cloud_acc.pcd", p_c, write_ascii=True)# accumulated cloud 
 
 def Get_octree(octree, direccion, i, origin, puntos): #,arreglo):
   '''octree -> occupation prob [n,]
