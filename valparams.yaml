@@ -1,0 +1,18 @@
+carpetas: 
+  carpeta_iter: "Voxnet/Itera6/"
+  direccion : "/mnt/6C24E28478939C77/Saulo/ProyectoPHD/"
+  objeto : "objects"
+  path_weights : '/mnt/6C24E28478939C77/Saulo/ProyectoPHD/position/weights_entrenamiento_MLP_xavier_normal_2.pth'
+  csv_name: 'NBV_Voxnet5.csv'
+
+variables:
+  umbral : 0.0035
+  voxel_resolution: .1
+  maximum_views : 15
+
+#Camera params
+camera: 
+  img_H : 320
+  img_W : 240
+  up : [0, 1, 0] 
+  fov : 45
