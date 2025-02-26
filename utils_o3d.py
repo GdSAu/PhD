@@ -90,7 +90,7 @@ def Get_octree(octree, direccion, i, origin, puntos): #,arreglo):
       maxrange=-1, # maximum range for how long individual beams are inserted
       )  
   #arreglo = np.ndarray([29791], dtype=float)
-  arreglo = np.full((29791), 0.0)
+  arreglo = np.full((29791), 0.5)
   j = 0 
   for i in puntos:
       #Get occupancy probability given a position (x,y,z)
