@@ -1,6 +1,9 @@
 import open3d as o3d
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fd0bb701e727abe9068c09ad4aa2096ab8eb11c2
 from utils_o3d_v2 import scale_and_translate
 
 class SceneLoader:
@@ -14,6 +17,7 @@ class SceneLoader:
         self.mesh, self.mesh_material = self.load_mesh()
         if self.floort == True:
             self.floor, self.floor_material = self.create_floor()
+<<<<<<< HEAD
 =======
 
 =======
@@ -36,10 +40,13 @@ class SceneLoader:
         if self.floort == True:
             self.floor, self.floor_material = self.create_floor()
 >>>>>>> "Agregamos clases, control de experimento con yaml :)"
+=======
+>>>>>>> fd0bb701e727abe9068c09ad4aa2096ab8eb11c2
     
     def load_mesh(self):
       mesh = o3d.io.read_triangle_mesh(self.mesh_file + '/meshes/model.obj', True)
       if self.scale == True:
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         mesh = scale_and_translate(mesh, scale_factor=self.scale_factor)
@@ -53,11 +60,16 @@ class SceneLoader:
       return mesh, mesh_material
 >>>>>>> "Sceneloader_probar"
 =======
+=======
+>>>>>>> fd0bb701e727abe9068c09ad4aa2096ab8eb11c2
         mesh = scale_and_translate(mesh, scale_factor=self.scale_factor)
       material = o3d.visualization.rendering.MaterialRecord() # Create material
       material.albedo_img = o3d.io.read_image(self.mesh_file + '/meshes/texture.png') # Add texture
       return mesh, material
+<<<<<<< HEAD
 >>>>>>> "Agregamos clases, control de experimento con yaml :)"
+=======
+>>>>>>> fd0bb701e727abe9068c09ad4aa2096ab8eb11c2
 
     def create_floor(self):
         floor = o3d.geometry.TriangleMesh.create_box(width=self.floor_size, height=self.floor_size, depth=self.floor_depth)
@@ -65,6 +77,7 @@ class SceneLoader:
         floor.paint_uniform_color([0.1, 0.1, 0.7])  # Pintar el piso de color azul
         material_floor = o3d.visualization.rendering.MaterialRecord() # Create floor material
         material_floor.albedo_img = o3d.io.read_image('wood_floor_texture.png') # Add texture
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         return floor, material_floor
@@ -101,6 +114,9 @@ class SceneLoader:
 =======
         return floor, material_floor
 >>>>>>> "Agregamos clases, control de experimento con yaml :)"
+=======
+        return floor, material_floor
+>>>>>>> fd0bb701e727abe9068c09ad4aa2096ab8eb11c2
     
     def create_offrender_scene(self, img_W, img_H):
         if self.floort == True:
@@ -128,6 +144,7 @@ class SceneLoader:
             return scene
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     def get_scenes(self):
         return self.create_offrender_scene(), self.create_raycast_scene()    
 >>>>>>> "Sceneloader_probar"
@@ -135,3 +152,7 @@ class SceneLoader:
     def get_scenes(self, img_W, img_H):
         return self.create_offrender_scene(img_W, img_H), self.create_raycast_scene()
 >>>>>>> "Agregamos clases, control de experimento con yaml :)"
+=======
+    def get_scenes(self, img_W, img_H):
+        return self.create_offrender_scene(img_W, img_H), self.create_raycast_scene()
+>>>>>>> fd0bb701e727abe9068c09ad4aa2096ab8eb11c2
