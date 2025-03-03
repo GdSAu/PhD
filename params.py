@@ -27,7 +27,7 @@ class ExperimentParams:
     def getVoxelVariable(self):
         return self.params["variables"]["voxel_resolution"]
     
-    def getVoxelVariable(self):
+    def getMaximumVariable(self):
         return self.params["variables"]["maximum_views"]
     
     def getCameraParams(self):

@@ -4,11 +4,9 @@ import octomap
 import torch
 import numpy as np
 import pandas as pd
-from symlink import symbolic_dir
 from utils_o3d_v2 import Get_Pointcloud, Get_RGBD, Get_octree, Get_PointcloudGT, scale_and_translate, Get_voxpoints
 from MLP import MLP
 from utils import net_position_nbv
-from dataset_download import download_collection
 from utils_metrics import chamfer_distance, Get_cloud_distance, getCobertura
 from utils_save import GuardarDS
 from params import ExperimentParams
@@ -35,6 +33,7 @@ class executeExperiment:
         self.weights_path = self.params.getPesosCarpeta()
         self.csv_name = self.params.getCSVName()
         self.umbral = self.params.getUmbralVariable()
+        self.max_views = self.params.getMaximumVariable()
         self.img_H, self.img_W, self.up, self.fov = self.params.getCameraParams()
         self.voxel_resolution = self.params.getVoxelVariable()
 
@@ -82,7 +81,7 @@ class executeExperiment:
             
             #print("Inicia el proceso de reconstrucción ...")
             #while condicion == False:
-            for i in range(0,15):    
+            for i in range(0,self.max_views):    
                 # RGBD and pointcloud extraction
                 Get_Pointcloud(scene, self.fov, cent, eye, self.up, self.img_W, self.img_H, dir_carpeta, i, self.carpeta_iter, save_acc= True)
                 Get_RGBD(render,  self.fov, cent, eye, self.up, dir_carpeta, i, self.carpeta_iter)
